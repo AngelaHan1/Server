@@ -17,11 +17,12 @@ public class Server extends Application {
     private int clientNo = 0;
     // vector to store active clients
     static Vector<ClientHandler> clientList = new Vector<>();
+    TextArea ta = new TextArea();
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) {
         // Text area for displaying contents
-        TextArea ta = new TextArea();
+
 
         // Create a scene and place it in the stage
         Scene scene = new Scene(new ScrollPane(ta), 450, 200);
@@ -77,6 +78,8 @@ public class Server extends Application {
     class ClientHandler implements Runnable {
         private String clientName;
         private Socket socket;
+        // Text area for displaying contents
+
 
         // constructor
         public ClientHandler(Socket s, String name)
@@ -93,6 +96,26 @@ public class Server extends Application {
                         socket.getInputStream());
                 DataOutputStream outputToClient = new DataOutputStream(
                         socket.getOutputStream());
+
+                while(true){
+                    InetAddress inetAddress = socket.getInetAddress();
+                    //get message from the client
+                    String text = inputFromClient.readUTF(); //sidenote, try readLine() if this doesnt work
+
+                    //String testing = "test";
+                    String sendText = clientName +": " + text;
+
+                    //send text back to clients
+                    outputToClient.writeUTF(sendText);
+
+                    Platform.runLater( () -> {
+                        // Display the client number
+                        ta.appendText("text received from " + clientName +  ": " + text + "\n");
+
+
+                    });
+
+                }
             }
             catch (IOException ex) {
                 ex.printStackTrace();
