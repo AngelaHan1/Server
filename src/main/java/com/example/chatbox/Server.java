@@ -57,8 +57,11 @@ public class Server extends Application {
 
                     });
 
+                    DataInputStream in = new DataInputStream(socket.getInputStream());
+                    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
                     // Create a new handler obj for this client
-                    ClientHandler currentClient = new ClientHandler(socket, "client" + clientNo);
+                    ClientHandler currentClient = new ClientHandler(socket, "client" + clientNo, in, out);
 
                     // Add this client to the client list
                     clientList.add(currentClient);
@@ -78,35 +81,46 @@ public class Server extends Application {
     class ClientHandler implements Runnable {
         private String clientName;
         private Socket socket;
+        final DataInputStream input;
+        final DataOutputStream out;
         // Text area for displaying contents
 
 
         // constructor
-        public ClientHandler(Socket s, String name)
+        public ClientHandler(Socket s, String name, DataInputStream in, DataOutputStream out)
         {
             this.clientName = name;
             this.socket = s;
+            this.input = in;
+            this.out = out;
         }
 
         @Override
         public void run() {
             try {
                 // Create data input and output streams
-                DataInputStream inputFromClient = new DataInputStream(
-                        socket.getInputStream());
-                DataOutputStream outputToClient = new DataOutputStream(
-                        socket.getOutputStream());
+
+//                DataInputStream inputFromClient = new DataInputStream(
+//                        socket.getInputStream());
+//
+//
+//                DataOutputStream outputToClient = new DataOutputStream(
+//                        socket.getOutputStream());
 
                 while(true){
-                    InetAddress inetAddress = socket.getInetAddress();
+
                     //get message from the client
-                    String text = inputFromClient.readUTF(); //sidenote, try readLine() if this doesnt work
+                    String text = input.readUTF(); //sidenote, try readLine() if this doesnt work
 
                     //String testing = "test";
                     String sendText = clientName +": " + text;
 
                     //send text back to clients
-                    outputToClient.writeUTF(sendText);
+                    for(ClientHandler i: Server.clientList){
+                       i.out.writeUTF(sendText);
+                       break;
+                    }
+
 
                     Platform.runLater( () -> {
                         // Display the client number
