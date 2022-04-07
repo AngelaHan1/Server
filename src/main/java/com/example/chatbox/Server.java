@@ -109,18 +109,34 @@ public class Server extends Application {
 
                 while(true){
 
-                    //get message from the client
-                    String text = input.readUTF(); //sidenote, try readLine() if this doesnt work
 
-                    //String testing = "test";
+                    //get message from the client
+//                    try {
+                        String text = input.readUTF(); //sidenote, try readLine() if this doesnt work
+//                    }
+//                    catch (SocketException noread){
+//                        clientList.remove(this);
+//                        noread.printStackTrace();
+//                    }
+
+//                    String testing = "test";
                     String sendText = clientName +": " + text;
 
                     //send text back to clients
-                    for(ClientHandler i: Server.clientList){
-                       i.out.writeUTF(sendText);
-                       break;
+                    for(int i = 0; i < Server.clientList.size(); i++){
+
+                        ClientHandler client = Server.clientList.get(i);
+                        try {
+                            client.out.writeUTF(sendText);
+                            }
+                        catch (SocketException missfire){
+                            missfire.printStackTrace();
+                        }
+                        //i.out.writeUTF(sendText);
+                        //break
                     }
 
+                    System.out.println("Message Sent");
 
                     Platform.runLater( () -> {
                         // Display the client number
