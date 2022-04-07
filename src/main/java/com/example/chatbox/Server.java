@@ -35,10 +35,11 @@ public class Server extends Application {
             try {
                 // Create a server socket
                 ServerSocket serverSocket = new ServerSocket(8000);
+
                 Platform.runLater(() ->
                         ta.appendText("Server started at " + new Date() + '\n'));
 
-                while (true)
+                while (!serverSocket.isClosed())
                 {
                     // Listen for a connection request
                     Socket socket = serverSocket.accept();
@@ -107,43 +108,43 @@ public class Server extends Application {
 //                DataOutputStream outputToClient = new DataOutputStream(
 //                        socket.getOutputStream());
 
-                while(true){
-
-
-                    //get message from the client
-//                    try {
+                while(!socket.isClosed()){
+                    try {
+                        //get message from the client
                         String text = input.readUTF(); //sidenote, try readLine() if this doesnt work
-//                    }
-//                    catch (SocketException noread){
-//                        clientList.remove(this);
-//                        noread.printStackTrace();
-//                    }
 
-//                    String testing = "test";
-                    String sendText = clientName +": " + text;
 
-                    //send text back to clients
-                    for(int i = 0; i < Server.clientList.size(); i++){
+                        String sendText = clientName +": " + text;
 
-                        ClientHandler client = Server.clientList.get(i);
-                        try {
-                            client.out.writeUTF(sendText);
+                        //send text back to clients
+                        for(int i = 0; i < Server.clientList.size(); i++){
+
+                            ClientHandler client = Server.clientList.get(i);
+                            try {
+                                client.out.writeUTF(sendText);
                             }
-                        catch (SocketException missfire){
-                            missfire.printStackTrace();
+                            catch (SocketException missfire){
+                                missfire.printStackTrace();
+                            }
+                            //i.out.writeUTF(sendText);
+                            //break
                         }
-                        //i.out.writeUTF(sendText);
-                        //break
+
+                        System.out.println("Message Sent");
+
+                        Platform.runLater( () -> {
+                            // Display the client number
+                            ta.appendText("text received from " + clientName +  ": " + text + "\n");
+
+
+                        });
                     }
-
-                    System.out.println("Message Sent");
-
-                    Platform.runLater( () -> {
-                        // Display the client number
-                        ta.appendText("text received from " + clientName +  ": " + text + "\n");
-
-
-                    });
+                    catch  (SocketException e){
+                        System.out.println("Client disconnected");
+                        //clientNo--;
+                        clientList.remove(this);
+                        break;
+                    }
 
                 }
             }
