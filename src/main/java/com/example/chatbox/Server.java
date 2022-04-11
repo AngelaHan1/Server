@@ -17,11 +17,12 @@ public class Server extends Application {
     private int clientNo = 0;
     // vector to store active clients
     static Vector<ClientHandler> clientList = new Vector<>();
+    TextArea ta = new TextArea();
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) {
         // Text area for displaying contents
-        TextArea ta = new TextArea();
+
 
         // Create a scene and place it in the stage
         Scene scene = new Scene(new ScrollPane(ta), 450, 200);
@@ -34,10 +35,11 @@ public class Server extends Application {
             try {
                 // Create a server socket
                 ServerSocket serverSocket = new ServerSocket(8000);
+
                 Platform.runLater(() ->
                         ta.appendText("Server started at " + new Date() + '\n'));
 
-                while (true)
+                while (!serverSocket.isClosed())
                 {
                     // Listen for a connection request
                     Socket socket = serverSocket.accept();
@@ -56,8 +58,11 @@ public class Server extends Application {
 
                     });
 
+                    DataInputStream in = new DataInputStream(socket.getInputStream());
+                    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+
                     // Create a new handler obj for this client
-                    ClientHandler currentClient = new ClientHandler(socket, "client" + clientNo);
+                    ClientHandler currentClient = new ClientHandler(socket, "client" + clientNo, in, out);
 
                     // Add this client to the client list
                     clientList.add(currentClient);
@@ -77,22 +82,71 @@ public class Server extends Application {
     class ClientHandler implements Runnable {
         private String clientName;
         private Socket socket;
+        final DataInputStream input;
+        final DataOutputStream out;
+        // Text area for displaying contents
+
 
         // constructor
-        public ClientHandler(Socket s, String name)
+        public ClientHandler(Socket s, String name, DataInputStream in, DataOutputStream out)
         {
             this.clientName = name;
             this.socket = s;
+            this.input = in;
+            this.out = out;
         }
 
         @Override
         public void run() {
             try {
                 // Create data input and output streams
-                DataInputStream inputFromClient = new DataInputStream(
-                        socket.getInputStream());
-                DataOutputStream outputToClient = new DataOutputStream(
-                        socket.getOutputStream());
+
+//                DataInputStream inputFromClient = new DataInputStream(
+//                        socket.getInputStream());
+//
+//
+//                DataOutputStream outputToClient = new DataOutputStream(
+//                        socket.getOutputStream());
+
+                while(!socket.isClosed()){
+                    try {
+                        //get message from the client
+                        String text = input.readUTF(); //sidenote, try readLine() if this doesnt work
+
+
+                        String sendText = clientName +": " + text;
+
+                        //send text back to clients
+                        for(int i = 0; i < Server.clientList.size(); i++){
+
+                            ClientHandler client = Server.clientList.get(i);
+                            try {
+                                client.out.writeUTF(sendText);
+                            }
+                            catch (SocketException missfire){
+                                missfire.printStackTrace();
+                            }
+                            //i.out.writeUTF(sendText);
+                            //break
+                        }
+
+                        System.out.println("Message Sent");
+
+                        Platform.runLater( () -> {
+                            // Display the client number
+                            ta.appendText("text received from " + clientName +  ": " + text + "\n");
+
+
+                        });
+                    }
+                    catch  (SocketException e){
+                        System.out.println("Client disconnected");
+                        //clientNo--;
+                        clientList.remove(this);
+                        break;
+                    }
+
+                }
             }
             catch (IOException ex) {
                 ex.printStackTrace();
