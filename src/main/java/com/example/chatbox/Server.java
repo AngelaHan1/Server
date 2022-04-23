@@ -1,6 +1,5 @@
 package com.example.chatbox;
 
-
 import java.io.*;
 import java.net.*;
 import java.util.Date;
@@ -12,6 +11,11 @@ import javafx.scene.Scene;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
+
+import java.util.Objects;
+
+import com.example.networkdemo.Message;
+import com.example.networkdemo.Types;
 
 public class Server extends Application {
     private int clientNo = 0;
@@ -58,11 +62,16 @@ public class Server extends Application {
 
                     });
 
-                    DataInputStream in = new DataInputStream(socket.getInputStream());
-                    DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                    ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                    ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+
+                    // Give a name to client
+                    String clientName = "client" + clientNo;
+//                    String name = in.readUTF();
+//                    clientName = name;
 
                     // Create a new handler obj for this client
-                    ClientHandler currentClient = new ClientHandler(socket, "client" + clientNo, in, out);
+                    ClientHandler currentClient = new ClientHandler(socket, clientName, in, out);
 
                     // Add this client to the client list
                     clientList.add(currentClient);
@@ -82,13 +91,13 @@ public class Server extends Application {
     class ClientHandler implements Runnable {
         private String clientName;
         private Socket socket;
-        final DataInputStream input;
-        final DataOutputStream out;
+        final ObjectInputStream input;
+        final ObjectOutputStream out;
         // Text area for displaying contents
 
 
         // constructor
-        public ClientHandler(Socket s, String name, DataInputStream in, DataOutputStream out)
+        public ClientHandler(Socket s, String name, ObjectInputStream in, ObjectOutputStream out)
         {
             this.clientName = name;
             this.socket = s;
@@ -99,42 +108,32 @@ public class Server extends Application {
         @Override
         public void run() {
             try {
-                // Create data input and output streams
-
-//                DataInputStream inputFromClient = new DataInputStream(
-//                        socket.getInputStream());
-//
-//
-//                DataOutputStream outputToClient = new DataOutputStream(
-//                        socket.getOutputStream());
 
                 while(!socket.isClosed()){
                     try {
                         //get message from the client
-                        String text = input.readUTF(); //sidenote, try readLine() if this doesnt work
-
-
-                        String sendText = clientName +": " + text;
+                        Object message = input.readObject(); //sidenote, try readLine() if this doesnt work
+                        Message text = (Message)message;
 
                         //send text back to clients
                         for(int i = 0; i < Server.clientList.size(); i++){
 
                             ClientHandler client = Server.clientList.get(i);
                             try {
-                                client.out.writeUTF(sendText);
+                                //System.out.println("out: " + text.getType().getDescription());
+                                client.out.writeObject(message);
                             }
                             catch (SocketException missfire){
                                 missfire.printStackTrace();
                             }
-                            //i.out.writeUTF(sendText);
-                            //break
+
                         }
 
-                        System.out.println("Message Sent");
+                        System.out.println();
 
                         Platform.runLater( () -> {
                             // Display the client number
-                            ta.appendText("text received from " + clientName +  ": " + text + "\n");
+                            ta.appendText("text received from " + clientName +  ": " + text.getType().getDescription() + "\n");
 
 
                         });
@@ -144,6 +143,9 @@ public class Server extends Application {
                         //clientNo--;
                         clientList.remove(this);
                         break;
+                    }
+                    catch (ClassNotFoundException ex){
+                        ex.printStackTrace();
                     }
 
                 }
