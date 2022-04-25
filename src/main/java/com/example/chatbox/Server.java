@@ -134,8 +134,6 @@ public class Server extends Application {
                         Platform.runLater( () -> {
                             // Display the client number
                             ta.appendText("text received from " + clientName +  ": " + text.getType().getDescription() + "\n");
-
-
                         });
                     }
                     catch  (SocketException e){
