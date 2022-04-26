@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.Date;
 import java.util.Vector;
 
+import com.example.networkdemo.HumanTypes;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -77,6 +78,11 @@ public class Server extends Application {
                     clientList.add(currentClient);
                     System.out.println("Adding this client to the client list...");
 
+                    if (clientNo % 2 != 0)
+                        out.writeObject(new Message('X',HumanTypes.MULTIGAME_CREATED));
+                    else
+                        out.writeObject(new Message('O',HumanTypes.MULTIGAME_CREATED));
+
                     // Create and start a new thread for the connection
                     new Thread(currentClient).start();
                 }
@@ -94,7 +100,6 @@ public class Server extends Application {
         final ObjectInputStream input;
         final ObjectOutputStream out;
         // Text area for displaying contents
-
 
         // constructor
         public ClientHandler(Socket s, String name, ObjectInputStream in, ObjectOutputStream out)
@@ -115,12 +120,14 @@ public class Server extends Application {
                         Object message = input.readObject(); //sidenote, try readLine() if this doesnt work
                         Message text = (Message)message;
 
+                        //Object response = new Message("Multi", HumanTypes.MULTIGAME_CREATED);
+
                         //send text back to clients
                         for(int i = 0; i < Server.clientList.size(); i++){
 
                             ClientHandler client = Server.clientList.get(i);
                             try {
-                                //System.out.println("out: " + text.getType().getDescription());
+                                System.out.println("out: " + text.getType().getDescription());
                                 client.out.writeObject(message);
                             }
                             catch (SocketException missfire){
@@ -131,10 +138,10 @@ public class Server extends Application {
 
                         System.out.println();
 
-                        Platform.runLater( () -> {
-                            // Display the client number
-                            ta.appendText("text received from " + clientName +  ": " + text.getType().getDescription() + "\n");
-                        });
+//                        Platform.runLater( () -> {
+//                            // Display the client number
+//                            //ta.appendText("text received from " + clientName +  ": " + text.getType().getDescription() + "\n");
+//                        });
                     }
                     catch  (SocketException e){
                         System.out.println("Client disconnected");

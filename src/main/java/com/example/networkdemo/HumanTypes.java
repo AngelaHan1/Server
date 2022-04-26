@@ -1,15 +1,27 @@
 package com.example.networkdemo;
 
 public enum HumanTypes implements Typess{
+    //options that the user can request to do
+    CREATE_SOLOGAME ("REQUEST: Create new single game"),
+    CREATE_MULTIGAME("REQUEST: Create new multi game"),
+    JOIN_GAME ("REQUEST: Join game"),
+    MAKE_MOVE ("REQUEST: Make move"),
+    QUIT ("REQUEST: Quit Game"),
+    REMATCH_REQUEST ("REQUEST: rematch"),
+    REMATCH_REJECT ("REQUEST: reject rematch"),
+    REMATCH_ACCEPT ("REQUEST: Accept Rematch"),
+    SEND_MESSAGE ("REQUEST: Send a message"),
 
-    CREATE_GAME ("Create a new game"), JOIN_GAME ("Join an existing game"),
-    MAKE_MOVE ("Make a move"), QUIT ("Quit Game"),
-    REMATCH_REQUEST ("Request rematch"), REMATCH_REJECT ("Reject rematch"),
-    REMATCH_ACCEPT ("Accept Rematch"), SEND_MESSAGE ("Send a message"),
-    GAME_CREATED("A new game is created"),
-    MOVE_MADE ("Current move"),MOVE_REJECTED("Invalid move"), WINNER ("Winner"),
-    TIE ("Game tied!"), REMATCH_ACCEPTED("Accept rematch, clear board & restart game"),
-    REMATCH_REJECTED ("Rejected Rematch, clear board"), GAME_OVER ("Game over. Clear board");
+    //Responses back
+    SOLOGAME_CREATED("New solo-game is created"),
+    MULTIGAME_CREATED("New multi-game is created"),
+    MOVE_MADE ("Current move"),
+    MOVE_REJECTED("Invalid move"),
+    WINNER ("Winner"),
+    TIE ("Game tied!"),
+    REMATCH_ACCEPTED("Accept rematch, clear board & restart game"),
+    REMATCH_REJECTED ("Rejected Rematch, clear board"),
+    GAME_OVER ("Game over. Clear board");
 
 
     private String description;
