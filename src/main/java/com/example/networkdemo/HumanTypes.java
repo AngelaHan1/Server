@@ -16,6 +16,7 @@ public enum HumanTypes implements Typess{
     SOLOGAME_CREATED("New solo-game is created"),
     MULTIGAME_CREATED("New multi-game is created"),
     MOVE_MADE ("Current move"),
+    PLAYER_TURN("Player's turn"),
     MOVE_REJECTED("Invalid move"),
     WINNER ("Winner"),
     TIE ("Game tied!"),

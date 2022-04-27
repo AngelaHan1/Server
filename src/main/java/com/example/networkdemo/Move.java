@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class Move implements Serializable {
     private int x;
     private int y;
-    private static char token;
+    private char token;
 //    private String room_id;
 
     Move(int x,int y, char token) {
@@ -25,7 +25,7 @@ public class Move implements Serializable {
 
     int getY() { return y; }
 
-    static char getToken() { return token; }
+    char getToken() { return token; }
 
 //    String getRoom_id() { return room_id; }
 
@@ -33,7 +33,7 @@ public class Move implements Serializable {
 
     void setY(int y) { this.y = y; }
 
-    static void setToken(char t) { token = t; }
+    void setToken(char t) { token = t; }
 
 //    void setRoom_id(String room_id) { this.room_id = room_id; }
 }
