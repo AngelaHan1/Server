@@ -5,7 +5,7 @@ import java.net.*;
 import java.util.Date;
 import java.util.Vector;
 
-import com.example.networkdemo.HumanTypes;
+import com.example.networkdemo.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -15,14 +15,12 @@ import javafx.stage.Stage;
 
 import java.util.Objects;
 
-import com.example.networkdemo.Message;
-import com.example.networkdemo.Types;
-
 public class Server extends Application {
     private int clientNo = 0;
     // vector to store active clients
     static Vector<ClientHandler> clientList = new Vector<>();
     TextArea ta = new TextArea();
+    static Vector<GameRoom> gameRoomList = new Vector<>();
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) {
@@ -72,16 +70,16 @@ public class Server extends Application {
 //                    clientName = name;
 
                     // Create a new handler obj for this client
-                    ClientHandler currentClient = new ClientHandler(socket, clientName, in, out);
+                    ClientHandler currentClient = new ClientHandler(socket, clientName, in, out, clientNo);
 
                     // Add this client to the client list
                     clientList.add(currentClient);
                     System.out.println("Adding this client to the client list...");
-
-                    if (clientNo % 2 != 0)
-                        out.writeObject(new Message('X',HumanTypes.MULTIGAME_CREATED));
-                    else
-                        out.writeObject(new Message('O',HumanTypes.MULTIGAME_CREATED));
+//
+//                    if (clientNo % 2 != 0)
+//                        out.writeObject(new Message('X',HumanTypes.MULTIGAME_CREATED));
+//                    else
+//                        out.writeObject(new Message('O',HumanTypes.MULTIGAME_CREATED));
 
                     // Create and start a new thread for the connection
                     new Thread(currentClient).start();
@@ -99,16 +97,19 @@ public class Server extends Application {
         private Socket socket;
         final ObjectInputStream input;
         final ObjectOutputStream out;
+        private int clientNo;
         // Text area for displaying contents
 
         // constructor
-        public ClientHandler(Socket s, String name, ObjectInputStream in, ObjectOutputStream out)
+        public ClientHandler(Socket s, String name, ObjectInputStream in, ObjectOutputStream out, int clientNo)
         {
             this.clientName = name;
             this.socket = s;
             this.input = in;
             this.out = out;
+            this.clientNo = clientNo;
         }
+
 
         @Override
         public void run() {
@@ -119,6 +120,7 @@ public class Server extends Application {
                         //get message from the client
                         Object message = input.readObject(); //sidenote, try readLine() if this doesnt work
                         Message text = (Message)message;
+                        String type = String.valueOf(text.getType());
 
                         //Object response = new Message("Multi", HumanTypes.MULTIGAME_CREATED);
 
@@ -134,6 +136,51 @@ public class Server extends Application {
                                 missfire.printStackTrace();
                             }
 
+                        }
+
+
+                        switch (type) {
+                            case "CREATE_MULTIGAME" :
+                                // create a new game room and assign creator to room 1 with token 'X'
+                                GameRoom room = new GameRoom(clientNo, "multi");
+                                gameRoomList.add(room);
+                                System.out.println("Adding a new room to the room list...");
+                                // only send to sender
+                                this.out.writeObject(new Message(room, HumanTypes.MULTIGAME_CREATED));
+
+
+                                //send new room to all clients (to update the room list that players can choose
+                                for(int i = 0; i < Server.clientList.size(); i++){
+                                    ClientHandler client = Server.clientList.get(i);
+                                    try {
+                                        System.out.println("Send new room " + room.getRoomID());
+                                        client.out.writeObject(new Message(room.getRoomID(), HumanTypes.ROOM_ADDED));
+                                    }
+                                    catch (SocketException missfire){
+                                        missfire.printStackTrace();
+                                    }
+                                }
+                                break;
+                            case "JOIN_GAME":  // this message was sent with the room_id player wanna join
+                                String room_id = (String) text.getData();
+                                for (int i = 0; i < Server.gameRoomList.size(); i++) {
+                                    GameRoom currentRoom = Server.gameRoomList.get(i);
+                                    // if room is found
+                                    if (currentRoom.getRoomID().equals(room_id)) {
+                                        // if room is not full (player 2 hasn't joined)
+                                        if (currentRoom.getPlayer2().getUserName().equals("")) {
+                                            currentRoom.setPlayer2(clientNo);
+                                            System.out.println("Adding client " + clientNo + " to " + currentRoom.getRoomID());
+                                            this.out.writeObject(new Message(currentRoom, HumanTypes.JOIN_SUCCESS));
+                                        }
+                                        else  // else if the room is full
+                                            this.out.writeObject(new Message("full", HumanTypes.JOIN_FAIL));
+                                    }
+                                    else
+                                        this.out.writeObject(new Message("room not found", HumanTypes.JOIN_FAIL));
+                                        System.out.println("Room not found");
+                                }
+                                break;
                         }
 
                         System.out.println();
@@ -160,6 +207,10 @@ public class Server extends Application {
             }
         }
     }
+
+
+
+    
 
     /**
      * The main method is only needed for the IDE with limited

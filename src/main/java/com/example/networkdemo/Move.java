@@ -14,7 +14,7 @@ public class Move implements Serializable {
         this.x = x;
         this.y = y;
         this.token = token;
-//        this.room_id = room_id;
+ //       this.room_id = room_id;
     }
     Move(int x, int y){
         this.x = x;
@@ -27,7 +27,7 @@ public class Move implements Serializable {
 
     char getToken() { return token; }
 
-//    String getRoom_id() { return room_id; }
+ //   String getRoom_id() { return room_id; }
 
     void setX(int x) { this.x = x; }
 
