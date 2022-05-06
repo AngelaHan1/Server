@@ -20,7 +20,8 @@ public class Server extends Application {
     // vector to store active clients
     static Vector<ClientHandler> clientList = new Vector<>();
     TextArea ta = new TextArea();
-    static Vector<GameRoom> gameRoomList = new Vector<>();
+    static RoomList roomList = new RoomList();
+    //static Vector<GameRoom> gameRoomList = new Vector<>();
 
     @Override // Override the start method in the Application class
     public void start(Stage primaryStage) {
@@ -75,6 +76,7 @@ public class Server extends Application {
                     // Add this client to the client list
                     clientList.add(currentClient);
                     System.out.println("Adding this client to the client list...");
+
 //
 //                    if (clientNo % 2 != 0)
 //                        out.writeObject(new Message('X',HumanTypes.MULTIGAME_CREATED));
@@ -117,12 +119,11 @@ public class Server extends Application {
 
                 while(!socket.isClosed()){
                     try {
+
                         //get message from the client
                         Object message = input.readObject(); //sidenote, try readLine() if this doesnt work
                         Message text = (Message)message;
                         String type = String.valueOf(text.getType());
-
-                        //Object response = new Message("Multi", HumanTypes.MULTIGAME_CREATED);
 
                         //send text back to clients
                         for(int i = 0; i < Server.clientList.size(); i++){
@@ -135,53 +136,72 @@ public class Server extends Application {
                             catch (SocketException missfire){
                                 missfire.printStackTrace();
                             }
-
                         }
 
+//                        switch (type) {
+//                            case "JOIN_SUCCESS":
+//                                GameRoom roomJoined = (GameRoom) text.getData();
+//                                //HumanPlayer thisPlayer2 = roomJoined.getPlayer2();
+//                                System.out.println("Room id: " + roomJoined.getRoomID());
+//                                System.out.println("Player 1: " + roomJoined.getPlayer1().getUserName());
+//                                System.out.println("Player 2: " + roomJoined.getPlayer2().getUserName());
+//                        }
 
-                        switch (type) {
-                            case "CREATE_MULTIGAME" :
-                                // create a new game room and assign creator to room 1 with token 'X'
-                                GameRoom room = new GameRoom(clientNo, "multi");
-                                gameRoomList.add(room);
-                                System.out.println("Adding a new room to the room list...");
-                                // only send to sender
-                                this.out.writeObject(new Message(room, HumanTypes.MULTIGAME_CREATED));
 
-
-                                //send new room to all clients (to update the room list that players can choose
-                                for(int i = 0; i < Server.clientList.size(); i++){
-                                    ClientHandler client = Server.clientList.get(i);
-                                    try {
-                                        System.out.println("Send new room " + room.getRoomID());
-                                        client.out.writeObject(new Message(room.getRoomID(), HumanTypes.ROOM_ADDED));
-                                    }
-                                    catch (SocketException missfire){
-                                        missfire.printStackTrace();
-                                    }
-                                }
-                                break;
-                            case "JOIN_GAME":  // this message was sent with the room_id player wanna join
-                                String room_id = (String) text.getData();
-                                for (int i = 0; i < Server.gameRoomList.size(); i++) {
-                                    GameRoom currentRoom = Server.gameRoomList.get(i);
-                                    // if room is found
-                                    if (currentRoom.getRoomID().equals(room_id)) {
-                                        // if room is not full (player 2 hasn't joined)
-                                        if (currentRoom.getPlayer2().getUserName().equals("")) {
-                                            currentRoom.setPlayer2(clientNo);
-                                            System.out.println("Adding client " + clientNo + " to " + currentRoom.getRoomID());
-                                            this.out.writeObject(new Message(currentRoom, HumanTypes.JOIN_SUCCESS));
-                                        }
-                                        else  // else if the room is full
-                                            this.out.writeObject(new Message("full", HumanTypes.JOIN_FAIL));
-                                    }
-                                    else
-                                        this.out.writeObject(new Message("room not found", HumanTypes.JOIN_FAIL));
-                                        System.out.println("Room not found");
-                                }
-                                break;
-                        }
+//                        switch (type) {
+//                            case "SEND_NAME" :
+//                                // get username and saved in this.clientName
+//                                clientName = (String) text.getData();
+//                                break;
+//
+//                            case "CREATE_MULTIGAME" :
+//                                // create a new game room and assign creator to room 1 with token 'X'
+//                                GameRoom room = new GameRoom(clientName, "multi");
+//                                System.out.println("Adding a new room to the room list...");
+//                                roomList.addToList(room);
+//                                // only send to sender
+//                                this.out.writeObject(new Message(room, HumanTypes.MULTIGAME_CREATED));
+//
+//
+//                                //send new room to all clients (to update the room list that players can choose
+//                                for(int j = 0; j < Server.clientList.size(); j++){
+//                                    try {
+//                                        ClientHandler client = Server.clientList.get(j);
+//                                        System.out.println(roomList.size());
+//                                        //client.out.writeObject(new Message(room.getRoomID(), HumanTypes.ROOM_ADDED));
+//                                        Message newMessage = new Message(roomList, HumanTypes.ROOM_ADDED);
+//                                        client.out.writeObject(newMessage);
+//                                    }
+//                                    catch (SocketException missfire){
+//                                        missfire.printStackTrace();
+//                                    }
+//                                }
+//
+//                                break;
+//                            case "JOIN_GAME":  // this message was sent with the room_id player wanna join
+//                                String room_id = (String) text.getData();
+//
+//                                for (int i = 0; i < roomList.size(); i++) {
+//                                    GameRoom currentRoom = roomList.getGameRoomList().get(i);
+//                                    // if room is found
+//                                    if (currentRoom.getRoomID().equals(room_id)) {
+//                                        // if room is not full (player 2 hasn't joined)
+//                                        if (currentRoom.getPlayer2().getUserName().equals("")) {
+//                                            currentRoom.setPlayer2(clientName);
+//                                            roomList.updatePlayer2InList(currentRoom);
+//                                            System.out.println("Adding client " + currentRoom.getPlayer2().getUserName() + " to " + currentRoom.getRoomID());
+//                                            this.out.writeObject(new Message(currentRoom, HumanTypes.JOIN_SUCCESS));
+//
+//                                        }
+//                                        else  // else if the room is full
+//                                            this.out.writeObject(new Message("full", HumanTypes.JOIN_FAIL));
+//                                    }
+////                                    else
+////                                        this.out.writeObject(new Message("room not found", HumanTypes.JOIN_FAIL));
+////                                        System.out.println("Room not found");
+//                                }
+//                                break;
+ //                       }
 
                         System.out.println();
 

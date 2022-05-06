@@ -3,48 +3,45 @@ package com.example.networkdemo;
 import java.io.Serializable;
 
 public class GameRoom implements Serializable {
-    String room_id;
-    HumanPlayer player1;
-    HumanPlayer player2;
+    private String room_id;
+    private HumanPlayer player1;
+    private HumanPlayer player2;
 
 
-
-    public GameRoom(int creatorNo, String mode)
+    // when a new room is created
+    public GameRoom(String creatorName, String mode)
     {
-
         // create a random string for room id
-        // ****************** will do
-        // TEMP:
         room_id = generateRoomID(7);
         // set first player (room creator)
         // assign token X
-        setPlayer1(creatorNo);
+        setPlayer1(creatorName);
 
         if (mode == "multi") {
             player2 = new HumanPlayer(""); // for multigame, when room is created, player2 is empty
         }
         if (mode == "solo")
-            setPlayer2AsComputer(creatorNo); // for sologame, when room is created, player2 is AI
+            setPlayer2AsComputer(creatorName); // for sologame, when room is created, player2 is AI
     }
 
     public String getRoomID() { return room_id; }
     public HumanPlayer getPlayer1() { return player1; }
     public HumanPlayer getPlayer2() { return player2; }
 
-    public void setPlayer1(int playerNo) {
-        player1 = new HumanPlayer("Player " + playerNo);
+    public void setPlayer1(String creatorName) {
+        player1 = new HumanPlayer(creatorName);
         player1.setToken('X');  // always assign token x for player 1
         player1.setRoom_id(room_id);
     }
 
-    public void setPlayer2(int playerNo) {
-        player2 = new HumanPlayer("Player " + playerNo);
+    public void setPlayer2(String creatorName) {
+        player2 = new HumanPlayer(creatorName);
         player2.setToken('O'); // always assign token o for player 2
         player2.setRoom_id(room_id);
     }
 
-    public void setPlayer2AsComputer(int playerNo) {
-        player2.setUserName("Computer " + playerNo);
+    public void setPlayer2AsComputer(String joinerName) {
+        player2.setUserName(joinerName);
         player2.setToken('O');
         player2.setRoom_id(room_id);
     }
@@ -85,3 +82,4 @@ public class GameRoom implements Serializable {
         return sb.toString();
     }
 }
+
