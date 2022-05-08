@@ -55,6 +55,7 @@ public class Server extends Application {
                         // Display the client number
                         ta.appendText("Starting thread for client " + clientNo + " at" + new Date() + '\n');
 
+
                         // Find the client's host name, and IP address
                         InetAddress inetAddress = socket.getInetAddress();
                         ta.appendText("Client " + clientNo + "'s host name is " + inetAddress.getHostName() + "\n");
@@ -76,6 +77,10 @@ public class Server extends Application {
                     // Add this client to the client list
                     clientList.add(currentClient);
                     System.out.println("Adding this client to the client list...");
+
+                    if(clientList.size() > 2){
+                        ClientHandler.newClient();
+                    }
 
 //
 //                    if (clientNo % 2 != 0)
@@ -138,77 +143,8 @@ public class Server extends Application {
                             }
                         }
 
-//                        switch (type) {
-//                            case "JOIN_SUCCESS":
-//                                GameRoom roomJoined = (GameRoom) text.getData();
-//                                //HumanPlayer thisPlayer2 = roomJoined.getPlayer2();
-//                                System.out.println("Room id: " + roomJoined.getRoomID());
-//                                System.out.println("Player 1: " + roomJoined.getPlayer1().getUserName());
-//                                System.out.println("Player 2: " + roomJoined.getPlayer2().getUserName());
-//                        }
-
-
-//                        switch (type) {
-//                            case "SEND_NAME" :
-//                                // get username and saved in this.clientName
-//                                clientName = (String) text.getData();
-//                                break;
-//
-//                            case "CREATE_MULTIGAME" :
-//                                // create a new game room and assign creator to room 1 with token 'X'
-//                                GameRoom room = new GameRoom(clientName, "multi");
-//                                System.out.println("Adding a new room to the room list...");
-//                                roomList.addToList(room);
-//                                // only send to sender
-//                                this.out.writeObject(new Message(room, HumanTypes.MULTIGAME_CREATED));
-//
-//
-//                                //send new room to all clients (to update the room list that players can choose
-//                                for(int j = 0; j < Server.clientList.size(); j++){
-//                                    try {
-//                                        ClientHandler client = Server.clientList.get(j);
-//                                        System.out.println(roomList.size());
-//                                        //client.out.writeObject(new Message(room.getRoomID(), HumanTypes.ROOM_ADDED));
-//                                        Message newMessage = new Message(roomList, HumanTypes.ROOM_ADDED);
-//                                        client.out.writeObject(newMessage);
-//                                    }
-//                                    catch (SocketException missfire){
-//                                        missfire.printStackTrace();
-//                                    }
-//                                }
-//
-//                                break;
-//                            case "JOIN_GAME":  // this message was sent with the room_id player wanna join
-//                                String room_id = (String) text.getData();
-//
-//                                for (int i = 0; i < roomList.size(); i++) {
-//                                    GameRoom currentRoom = roomList.getGameRoomList().get(i);
-//                                    // if room is found
-//                                    if (currentRoom.getRoomID().equals(room_id)) {
-//                                        // if room is not full (player 2 hasn't joined)
-//                                        if (currentRoom.getPlayer2().getUserName().equals("")) {
-//                                            currentRoom.setPlayer2(clientName);
-//                                            roomList.updatePlayer2InList(currentRoom);
-//                                            System.out.println("Adding client " + currentRoom.getPlayer2().getUserName() + " to " + currentRoom.getRoomID());
-//                                            this.out.writeObject(new Message(currentRoom, HumanTypes.JOIN_SUCCESS));
-//
-//                                        }
-//                                        else  // else if the room is full
-//                                            this.out.writeObject(new Message("full", HumanTypes.JOIN_FAIL));
-//                                    }
-////                                    else
-////                                        this.out.writeObject(new Message("room not found", HumanTypes.JOIN_FAIL));
-////                                        System.out.println("Room not found");
-//                                }
-//                                break;
- //                       }
 
                         System.out.println();
-
-//                        Platform.runLater( () -> {
-//                            // Display the client number
-//                            //ta.appendText("text received from " + clientName +  ": " + text.getType().getDescription() + "\n");
-//                        });
                     }
                     catch  (SocketException e){
                         System.out.println("Client disconnected");
@@ -226,11 +162,28 @@ public class Server extends Application {
                 ex.printStackTrace();
             }
         }
+
+        public static void newClient(){
+            for(int i = 0; i < Server.clientList.size(); i++){
+
+                ClientHandler client = Server.clientList.get(i);
+
+
+
+                try {
+                    //System.out.println("out: " + text.getType().getDescription());
+                    Message message = new Message("New Client", HumanTypes.NEW_CLIENT);
+                    client.out.writeObject(message);
+                }
+                catch (SocketException missfire){
+                    missfire.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
     }
-
-
-
-    
 
     /**
      * The main method is only needed for the IDE with limited

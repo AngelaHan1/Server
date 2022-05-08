@@ -12,6 +12,8 @@ public enum HumanTypes implements Typess{
     REMATCH_REJECT ("REQUEST: reject rematch"),
     REMATCH_ACCEPT ("REQUEST: Accept Rematch"),
     SEND_MESSAGE ("REQUEST: Send a message"),
+    NEW_CLIENT("New player has joined server"),
+    SEND_GAMECHANNEL("Sending gamechannel info to new client"),
 
     //Responses back
     SOLOGAME_CREATED("New solo-game is created"),
