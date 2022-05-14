@@ -6,6 +6,7 @@ public class GameRoom implements Serializable {
     private String room_id;
     private HumanPlayer player1;
     private HumanPlayer player2;
+    private AIPlayer aiPlayer2;
 
 
     // when a new room is created
@@ -21,7 +22,8 @@ public class GameRoom implements Serializable {
             player2 = new HumanPlayer(""); // for multigame, when room is created, player2 is empty
         }
         if (mode == "solo")
-            setPlayer2AsComputer(creatorName); // for sologame, when room is created, player2 is AI
+            setPlayer2AsComputer("AI"); // for sologame, when room is created, player2 is AI
+        //I changed creatorName to AI temporarily
     }
 
     public String getRoomID() { return room_id; }
@@ -41,9 +43,10 @@ public class GameRoom implements Serializable {
     }
 
     public void setPlayer2AsComputer(String joinerName) {
-        player2.setUserName(joinerName);
-        player2.setToken('O');
-        player2.setRoom_id(room_id);
+        aiPlayer2 = new AIPlayer(joinerName);
+        aiPlayer2.setUserName(joinerName);
+        aiPlayer2.setToken('O');
+        aiPlayer2.setRoom_id(room_id);
     }
 
     public void resetPlayer(HumanPlayer player) {
@@ -82,4 +85,3 @@ public class GameRoom implements Serializable {
         return sb.toString();
     }
 }
-
