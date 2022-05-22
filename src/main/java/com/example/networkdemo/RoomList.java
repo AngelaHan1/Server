@@ -16,6 +16,15 @@ public class RoomList implements Serializable  {
 
     public void addToList(GameRoom currentRoom) { gameRoomList.add(currentRoom); }
 
+    public void removeFromList(String currentRoom){
+        for(int i = 0; i< gameRoomList.size(); i++){
+            if(gameRoomList.get(i).getRoomID().equals(currentRoom)){
+                gameRoomList.remove(gameRoomList.get(i));
+            }
+        }
+
+    }
+
     public void updatePlayer2InList(GameRoom updatedRoom) {
         for (int i = 0; i < gameRoomList.size(); i++)
         {

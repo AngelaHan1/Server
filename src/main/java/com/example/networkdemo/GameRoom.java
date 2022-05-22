@@ -22,7 +22,7 @@ public class GameRoom implements Serializable {
             player2 = new HumanPlayer(""); // for multigame, when room is created, player2 is empty
         }
         if (mode == "solo")
-            setPlayer2AsComputer("AI"); // for sologame, when room is created, player2 is AI
+            setPlayer2("AI"); // for sologame, when room is created, player2 is AI
         //I changed creatorName to AI temporarily
     }
 
