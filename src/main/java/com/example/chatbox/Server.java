@@ -19,6 +19,7 @@ public class Server extends Application {
     private int clientNo = 0;
     // vector to store active clients
     static Vector<ClientHandler> clientList = new Vector<>();
+    static Vector<String> playerNameList = new Vector<>();
     TextArea ta = new TextArea();
     static RoomList roomList = new RoomList();
     //static Vector<GameRoom> gameRoomList = new Vector<>();
@@ -141,6 +142,30 @@ public class Server extends Application {
                             catch (SocketException missfire){
                                 missfire.printStackTrace();
                             }
+                        }
+
+                        switch (type) {
+                            case "SEND_NEW_USERNAME" :
+                                Boolean nameExists = false;
+                                String name = (String) text.getData();
+
+                                // traverse player name list to check if new username exists or not
+                                for(int i = 0; i < Server.playerNameList.size(); i++) {
+                                    System.out.println(playerNameList.get(i));
+                                    if (name.equals(playerNameList.get(i))) {
+                                        // if exists, send username exists message
+                                        Object nameInvalidMessage = new Message(name, HumanTypes.USERNAME_EXISTS);
+                                        out.writeObject(nameInvalidMessage);
+                                        nameExists = true;
+                                    }
+                                }
+
+                                // if not exists, add the new username to the list
+                                if (nameExists == false) {
+                                    System.out.println("added " + name);
+                                    playerNameList.add(name);
+                                }
+                                break;
                         }
 
 
