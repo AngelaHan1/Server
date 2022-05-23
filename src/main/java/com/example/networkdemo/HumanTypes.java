@@ -15,6 +15,7 @@ public enum HumanTypes implements Typess{
     NEW_CLIENT("New player has joined server"),
     SEND_GAMECHANNEL("Sending gamechannel info to new client"),
     LOBBY("request to join lobby"),
+    PLAY_AGAIN("REQUEST: Play against computer again"),
 
     //Responses back
     SOLOGAME_CREATED("New solo-game is created"),
@@ -31,7 +32,8 @@ public enum HumanTypes implements Typess{
     REMATCH_ACCEPTED("Accept rematch, clear board & restart game"),
     REMATCH_REJECTED ("Rejected Rematch, clear board"),
     GAME_OVER ("Game over. Clear board"),
-    JOIN_LOBBY("Access to Lobby allowed");
+    JOIN_LOBBY("Access to Lobby allowed"),
+    PLAYAGAIN_ACCEPTED("Play Computer again accepted");
 
 
     private String description;
